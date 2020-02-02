@@ -80,8 +80,9 @@ const Canvas: React.FC<CanvasProps> = ({height, width, cell_size}) => {
     
     }, [mod]);
 
-  return <canvas ref={canvasRef} width={(cell_size + 1) * height + 1} height={(cell_size + 1) * width + 1} />
-
+  return <canvas ref={canvasRef}
+                 width={(cell_size + 1) * height + 1}
+                 height={(cell_size + 1) * width + 1}/>
 }
 
 export default Canvas;
