@@ -2,6 +2,7 @@ import React from 'react';
 import {useCrate, useTakeEffect} from './utils/hooks';
 
 type CanvasProps = {
+  running: boolean,
   height: number,
   width: number,
   cellSize: number,
@@ -11,7 +12,7 @@ type CanvasProps = {
 
 const GRID_COLOR = "#CCCCCC";
 
-const Canvas: React.FC<CanvasProps> = ({height, width, cellSize, behaviors, colors}) => {
+const Canvas: React.FC<CanvasProps> = ({height, width, cellSize, behaviors, colors, running}) => {
 
     const mod = useCrate();
     const canvasRef = React.useRef<HTMLCanvasElement>(null);
@@ -68,12 +69,17 @@ const Canvas: React.FC<CanvasProps> = ({height, width, cellSize, behaviors, colo
       const TICKS_PER_FRAME = 100;
 
       const renderLoop = () => {
-        for (let i = 0; i < TICKS_PER_FRAME; i++) {
-          let diff = universe.tick();
-          paintDiff(diff);
-        }
+        if (running) {
+          for (let i = 0; i < TICKS_PER_FRAME; i++) {
+            let diff = universe.tick();
+            paintDiff(diff);
+          }
 
-        requestAnimationFrame(renderLoop);
+          requestAnimationFrame(renderLoop);
+        } else {
+          console.log("Delaying..." + running);
+          setTimeout(() => requestAnimationFrame(renderLoop), 1000);
+        }
       };
 
       drawGrid();

@@ -10,10 +10,20 @@ const App: React.FC = () => {
   const [behaviors, setBehaviors] = useState("LRRRRLR");
   const [colors, setColors] =
     useState(["#FFFFFF", "#000000", "#FF0000", "#00FF00", "#0000FF"]);
+  const [running, setRunning] = useState(false);
+
+  const toggleRunning = () => {
+    setRunning(!running);
+  }
 
   return <>
-    <ControlPanel />
-    <Canvas height={height} width={width} cellSize={cellSize} behaviors={behaviors} colors={colors}/>
+    <ControlPanel running={running} toggleRunning={toggleRunning}/>
+    <Canvas running={running}
+            height={height}
+            width={width}
+            cellSize={cellSize}
+            behaviors={behaviors}
+            colors={colors}/>
   </>;
 };
 
