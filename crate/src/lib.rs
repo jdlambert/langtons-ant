@@ -59,16 +59,16 @@ fn behavior_from_char(c: char) -> Result<Behavior, String> {
     }
 }
 
-fn behaviors_from_str(s: &str) -> Vec<Behavior> {
+fn behaviors_from_str(s: String) -> Vec<Behavior> {
     s.chars().map(|c| behavior_from_char(c).unwrap()).collect()
 }
 
 #[wasm_bindgen]
 impl Universe {
-    pub fn new(width: u32, height: u32) -> Universe {
+    pub fn new(width: u32, height: u32, behaviors: String) -> Universe {
         utils::set_panic_hook();
         let cells = vec![0; (width * height) as usize];
-        let behaviors = behaviors_from_str("LRRRRRLLR");
+        let behaviors = behaviors_from_str(behaviors);
         let ant = Ant {
             row: height / 2,
             col: width / 2,

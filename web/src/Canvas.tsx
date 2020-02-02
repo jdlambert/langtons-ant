@@ -5,19 +5,20 @@ type CanvasProps = {
   height: number,
   width: number,
   cell_size: number,
+  behaviors: string,
+  colors: string[],
 }
 
 const GRID_COLOR = "#CCCCCC";
-const COLORS = ["#FFFFFF", "#000000", "#FF0000", "#00FF00", "#0000FF"];
 
-const Canvas: React.FC<CanvasProps> = ({height, width, cell_size}) => {
+const Canvas: React.FC<CanvasProps> = ({height, width, cell_size, behaviors, colors}) => {
 
     const mod = useCrate();
     const canvasRef = React.useRef<HTMLCanvasElement>(null);
 
     useTakeEffect(() => {
-
-      const universe = mod.Universe.new(height, width);
+      
+      const universe = mod.Universe.new(height, width, behaviors);
       if (!canvasRef.current) {
         console.log("No canvas ref!")
         return;
@@ -53,7 +54,7 @@ const Canvas: React.FC<CanvasProps> = ({height, width, cell_size}) => {
       const paintDiff = (diff: number[]) => {
         ctx.beginPath();
 
-        ctx.fillStyle = COLORS[diff[2]];
+        ctx.fillStyle = colors[diff[2]];
 
         ctx.fillRect(
           diff[1] * (cell_size + 1) + 1,
