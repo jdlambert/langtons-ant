@@ -1,16 +1,18 @@
 import React from 'react';
 import {useCrate, useTakeEffect} from './utils/hooks';
 
-const Canvas: React.FC = () => {
+type CanvasProps = {
+  height: number,
+  width: number,
+  cell_size: number,
+}
+
+const GRID_COLOR = "#CCCCCC";
+const COLORS = ["#FFFFFF", "#000000", "#FF0000", "#00FF00", "#0000FF"];
+
+const Canvas: React.FC<CanvasProps> = ({height, width, cell_size}) => {
 
     const mod = useCrate();
-
-    const height = 1024;
-    const width = 1024
-    const CELL_SIZE = 1;
-    const GRID_COLOR = "#CCCCCC";
-    const COLORS = ["#FFFFFF", "#000000", "#FF0000", "#00FF00", "#0000FF"];
-
     const canvasRef = React.useRef<HTMLCanvasElement>(null);
 
     useTakeEffect(() => {
@@ -35,14 +37,14 @@ const Canvas: React.FC = () => {
 
         // Vertical lines.
         for (let i = 0; i <= width; i++) {
-          ctx.moveTo(i * (CELL_SIZE + 1) + 1, 0);
-          ctx.lineTo(i * (CELL_SIZE + 1) + 1, (CELL_SIZE + 1) * height + 1);
+          ctx.moveTo(i * (cell_size + 1) + 1, 0);
+          ctx.lineTo(i * (cell_size + 1) + 1, (cell_size + 1) * height + 1);
         }
 
         // Horizontal lines.
         for (let j = 0; j <= height; j++) {
-          ctx.moveTo(0,                           j * (CELL_SIZE + 1) + 1);
-          ctx.lineTo((CELL_SIZE + 1) * width + 1, j * (CELL_SIZE + 1) + 1);
+          ctx.moveTo(0,                           j * (cell_size + 1) + 1);
+          ctx.lineTo((cell_size + 1) * width + 1, j * (cell_size + 1) + 1);
         }
 
         ctx.stroke();
@@ -54,10 +56,10 @@ const Canvas: React.FC = () => {
         ctx.fillStyle = COLORS[diff[2]];
 
         ctx.fillRect(
-          diff[1] * (CELL_SIZE + 1) + 1,
-          diff[0] * (CELL_SIZE + 1) + 1,
-          CELL_SIZE,
-          CELL_SIZE);
+          diff[1] * (cell_size + 1) + 1,
+          diff[0] * (cell_size + 1) + 1,
+          cell_size,
+          cell_size);
 
         ctx.stroke();
       };
@@ -78,7 +80,7 @@ const Canvas: React.FC = () => {
     
     }, [mod]);
 
-  return <canvas ref={canvasRef} width={(CELL_SIZE + 1) * height + 1} height={(CELL_SIZE + 1) * width + 1} />
+  return <canvas ref={canvasRef} width={(cell_size + 1) * height + 1} height={(cell_size + 1) * width + 1} />
 
 }
 
