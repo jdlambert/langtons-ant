@@ -74,6 +74,7 @@ const Canvas: React.FC<CanvasProps> = ({height, width, cellSize, behaviors, colo
       if (!canvasContext) {
         return;
       }
+      canvasContext.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
       canvasContext.beginPath();
       canvasContext.strokeStyle = GRID_COLOR;
 
