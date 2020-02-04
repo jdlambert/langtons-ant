@@ -11,7 +11,7 @@ type CanvasProps = {
   colors: string[],
 }
 
-const TICKS_PER_FRAME = 10;
+const TICKS_PER_FRAME = 1000;
 const GRID_COLOR = "#CCCCCC";
 
 const Canvas: React.FC<CanvasProps> = ({height, width, cellSize, behaviors, colors, running}) => {
@@ -37,23 +37,6 @@ const Canvas: React.FC<CanvasProps> = ({height, width, cellSize, behaviors, colo
         return;
       }
 
-      const drawGrid = () => {
-        canvasContext.beginPath();
-        canvasContext.strokeStyle = GRID_COLOR;
-
-        // Vertical lines.
-        for (let i = 0; i <= width; i++) {
-          canvasContext.moveTo(i * (cellSize + 1) + 1, 0);
-          canvasContext.lineTo(i * (cellSize + 1) + 1, (cellSize + 1) * height + 1);
-        }
-        // Horizontal lines.
-        for (let j = 0; j <= height; j++) {
-          canvasContext.moveTo(0, j * (cellSize + 1) + 1);
-          canvasContext.lineTo((cellSize + 1) * width + 1, j * (cellSize + 1) + 1);
-        }
-
-        canvasContext.stroke();
-      };
 
       const paintDiff = (diff: Uint32Array) => {
         canvasContext.beginPath();
@@ -79,10 +62,34 @@ const Canvas: React.FC<CanvasProps> = ({height, width, cellSize, behaviors, colo
         }
       };
 
-      drawGrid();
       animationId.current = requestAnimationFrame(renderLoop);
 
     }, [running])
+
+    useEffect(() => {
+      if (!canvasRef.current) {
+        return;
+      }
+      const canvasContext = canvasRef.current.getContext('2d');
+      if (!canvasContext) {
+        return;
+      }
+      canvasContext.beginPath();
+      canvasContext.strokeStyle = GRID_COLOR;
+
+      // Vertical lines.
+      for (let i = 0; i <= width; i++) {
+        canvasContext.moveTo(i * (cellSize + 1) + 1, 0);
+        canvasContext.lineTo(i * (cellSize + 1) + 1, (cellSize + 1) * height + 1);
+      }
+      // Horizontal lines.
+      for (let j = 0; j <= height; j++) {
+        canvasContext.moveTo(0, j * (cellSize + 1) + 1);
+        canvasContext.lineTo((cellSize + 1) * width + 1, j * (cellSize + 1) + 1);
+      }
+
+      canvasContext.stroke();
+    }, [height, width, behaviors])
     
     useTakeEffect(() => setUniverse(mod.Universe.new(height, width, behaviors))
     , [mod, height, width, behaviors]);
