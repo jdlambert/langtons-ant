@@ -53,7 +53,6 @@ const Canvas: React.FC<CanvasProps> = ({height, width, cellSize, behaviors, colo
       };
 
       const renderLoop = () => {
-        console.log("Entering render loop" + running + universe);
         if (universe !== null) {
           for (let i = 0; i < TICKS_PER_FRAME; i++) {
             paintDiff(universe.tick());
@@ -64,7 +63,7 @@ const Canvas: React.FC<CanvasProps> = ({height, width, cellSize, behaviors, colo
 
       animationId.current = requestAnimationFrame(renderLoop);
 
-    }, [running])
+    }, [running, universe])
 
     useEffect(() => {
       if (!canvasRef.current) {
@@ -90,7 +89,7 @@ const Canvas: React.FC<CanvasProps> = ({height, width, cellSize, behaviors, colo
       }
 
       canvasContext.stroke();
-    }, [height, width, behaviors])
+    }, [height, width, behaviors, canvasRef])
     
     useTakeEffect(() => setUniverse(mod.Universe.new(height, width, behaviors))
     , [mod, height, width, behaviors]);

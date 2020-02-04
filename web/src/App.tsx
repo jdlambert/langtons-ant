@@ -9,7 +9,7 @@ const App: React.FC = () => {
   const [cellSize, setCellSize] = useState(3);
   const [colors, setColors] =
     useState(["#26547C", "#EF476F", "#FFD166", "#06D6A0", "#FCFCFC"]);
-  const [running, setRunning] = useState(false);
+  const [running, setRunning] = useState(true);
 
   // State that is moved into wasm
   const [height, setHeight] = useState(256);
