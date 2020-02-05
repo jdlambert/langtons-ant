@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useCrate, useTakeEffect} from './utils/hooks';
+import { useCrate } from './utils/hooks';
 import { Universe } from './crate';
 
 type CanvasProps = {
@@ -63,7 +63,14 @@ const Canvas: React.FC<CanvasProps> = ({height, width, cellSize, behaviors, colo
 
       animationId.current = requestAnimationFrame(renderLoop);
 
-    }, [running, universe])
+    }, [running, universe, colors, cellSize])
+    
+    useEffect(() => {
+      if (mod) {
+        setUniverse(mod.Universe.new(height, width, behaviors))
+      }
+    }, [mod, height, width, behaviors]);
+
 
     useEffect(() => {
       if (!canvasRef.current) {
@@ -89,11 +96,8 @@ const Canvas: React.FC<CanvasProps> = ({height, width, cellSize, behaviors, colo
       }
 
       canvasContext.stroke();
-    }, [height, width, behaviors, canvasRef])
+    }, [height, width, behaviors, cellSize, canvasRef])
     
-    useTakeEffect(() => setUniverse(mod.Universe.new(height, width, behaviors))
-    , [mod, height, width, behaviors]);
-
   return <canvas ref={canvasRef}
                  width={(cellSize + 1) * height + 1}
                  height={(cellSize + 1) * width + 1}/>
