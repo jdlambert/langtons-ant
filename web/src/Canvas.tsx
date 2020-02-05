@@ -11,8 +11,47 @@ type CanvasProps = {
   colors: string[],
 }
 
-const TICKS_PER_FRAME = 1000;
+const TICKS_PER_FRAME = 1;
 const GRID_COLOR = "#CCCCCC";
+
+const drawGrid = (canvas: HTMLCanvasElement, height: number, width: number, cellSize: number) => {
+
+    const canvasContext = canvas.getContext('2d')!;
+    canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+    canvasContext.beginPath();
+    canvasContext.strokeStyle = GRID_COLOR;
+
+    // Vertical lines.
+    for (let i = 0; i <= width; i++) {
+      canvasContext.moveTo(i * (cellSize + 1) + 1, 0);
+      canvasContext.lineTo(i * (cellSize + 1) + 1, (cellSize + 1) * height + 1);
+    }
+    // Horizontal lines.
+    for (let j = 0; j <= height; j++) {
+      canvasContext.moveTo(0, j * (cellSize + 1) + 1);
+      canvasContext.lineTo((cellSize + 1) * width + 1, j * (cellSize + 1) + 1);
+    }
+
+    canvasContext.stroke();
+}
+
+const paintDiff = (diff: Uint32Array,
+                    canvasContext: CanvasRenderingContext2D,
+                    colors: string[],
+                    cellSize: number) => {
+  canvasContext.beginPath();
+
+  canvasContext.fillStyle = colors[diff[2]];
+
+  canvasContext.fillRect(
+    diff[1] * (cellSize + 1) + 1,
+    diff[0] * (cellSize + 1) + 1,
+    cellSize,
+    cellSize);
+
+  canvasContext.stroke();
+};
+
 
 const Canvas: React.FC<CanvasProps> = ({height, width, cellSize, behaviors, colors, running}) => {
 
@@ -31,55 +70,21 @@ const Canvas: React.FC<CanvasProps> = ({height, width, cellSize, behaviors, colo
 
     useTakeEffect(() => {
       const canvas = canvasRef.current!;
-      const canvasContext = canvas.getContext('2d')!;
       setUniverse(mod.Universe.new(height, width, behaviors));
-
-      canvasContext.clearRect(0, 0, canvas.width, canvas.height);
-      canvasContext.beginPath();
-      canvasContext.strokeStyle = GRID_COLOR;
-
-      // Vertical lines.
-      for (let i = 0; i <= width; i++) {
-        canvasContext.moveTo(i * (cellSize + 1) + 1, 0);
-        canvasContext.lineTo(i * (cellSize + 1) + 1, (cellSize + 1) * height + 1);
-      }
-      // Horizontal lines.
-      for (let j = 0; j <= height; j++) {
-        canvasContext.moveTo(0, j * (cellSize + 1) + 1);
-        canvasContext.lineTo((cellSize + 1) * width + 1, j * (cellSize + 1) + 1);
-      }
-
-      canvasContext.stroke();
+      drawGrid(canvas, height, width, cellSize);
     }, [mod, height, width, behaviors, cellSize, canvasRef.current])
     
     useTakeEffect(() => {
       const canvasContext = canvasRef.current!.getContext('2d')!;
 
-      const paintDiff = (diff: Uint32Array) => {
-        canvasContext.beginPath();
-
-        canvasContext.fillStyle = colors[diff[2]];
-
-        canvasContext.fillRect(
-          diff[1] * (cellSize + 1) + 1,
-          diff[0] * (cellSize + 1) + 1,
-          cellSize,
-          cellSize);
-
-        canvasContext.stroke();
-      };
-
       const renderLoop = () => {
-        if (universe !== null) {
           for (let i = 0; i < TICKS_PER_FRAME; i++) {
-            paintDiff(universe.tick());
+            paintDiff(universe!.tick(), canvasContext, colors, cellSize);
           }
           setAnimationId(requestAnimationFrame(renderLoop))
-        }
       };
 
       setAnimationId(requestAnimationFrame(renderLoop));
-
     }, [universe, colors, cellSize, canvasRef.current]);
 
   return <canvas ref={canvasRef}
