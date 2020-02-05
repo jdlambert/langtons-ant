@@ -15,7 +15,6 @@ const TICKS_PER_FRAME = 1000;
 const GRID_COLOR = "#CCCCCC";
 
 const drawGrid = (canvas: HTMLCanvasElement, height: number, width: number, cellSize: number) => {
-
     const canvasContext = canvas.getContext('2d')!;
     canvasContext.clearRect(0, 0, canvas.width, canvas.height);
     canvasContext.beginPath();
@@ -53,24 +52,20 @@ const paintDiff = (diff: Uint32Array,
 };
 
 const Canvas: React.FC<CanvasProps> = ({height, width, cellSize, behaviors, colors, running}) => {
-
     const mod = useCrate();
     const canvasRef = useRef<HTMLCanvasElement>(null);
     let animationRef = useRef<number | null>(null);
-    const [universe, setUniverse] = useState<Universe | null>(null);
+    let universeRef = useRef<Universe | null>(null);
     
-    const renderLoop = () => {
+    const renderLoop = useCallback(() => {
       for (let i = 0; i < TICKS_PER_FRAME; i++) {
-        paintDiff(universe!.tick(), canvasRef.current!.getContext("2d")!, colors, cellSize);
+        paintDiff(universeRef.current!.tick(), canvasRef.current!.getContext("2d")!, colors, cellSize);
       }
       animationRef.current = requestAnimationFrame(renderLoop);
-    }
+    }, [colors, cellSize])
 
     const startLoop = () => {
-      if (!universe || canvasRef.current === null) {
-        return;
-      }
-      if (!animationRef.current) {
+      if (universeRef.current && canvasRef.current && animationRef.current == null) {
         animationRef.current = requestAnimationFrame(renderLoop);
       }
     }
@@ -83,18 +78,21 @@ const Canvas: React.FC<CanvasProps> = ({height, width, cellSize, behaviors, colo
     }
 
     useEffect(() => {
-      if (running) {
-        startLoop();
-      } else {
-        stopLoop();
+      if (universeRef.current && canvasRef.current) {
+        if (running) {
+          startLoop();
+        } else {
+          stopLoop();
+        }
       }
-    });
+    }, [running]);
 
     useTakeEffect(() => {
-      const canvas = canvasRef.current!;
-      setUniverse(mod.Universe.new(height, width, behaviors));
-      drawGrid(canvas, height, width, cellSize);
-    }, [mod, height, width, behaviors, cellSize, canvasRef.current])
+      if (canvasRef.current) {
+        universeRef.current = mod.Universe.new(height, width, behaviors);
+        drawGrid(canvasRef.current!, height, width, cellSize);
+      }
+    }, [mod, height, width, behaviors, cellSize])
     
   return <canvas ref={canvasRef}
                  width={(cellSize + 1) * height + 1}
