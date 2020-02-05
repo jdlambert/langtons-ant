@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useCrate, useTakeEffect } from './utils/hooks';
 import { Universe } from './crate';
 
@@ -11,7 +11,7 @@ type CanvasProps = {
   colors: string[],
 }
 
-const TICKS_PER_FRAME = 1;
+const TICKS_PER_FRAME = 1000;
 const GRID_COLOR = "#CCCCCC";
 
 const drawGrid = (canvas: HTMLCanvasElement, height: number, width: number, cellSize: number) => {
@@ -33,7 +33,7 @@ const drawGrid = (canvas: HTMLCanvasElement, height: number, width: number, cell
     }
 
     canvasContext.stroke();
-}
+};
 
 const paintDiff = (diff: Uint32Array,
                     canvasContext: CanvasRenderingContext2D,
@@ -52,21 +52,43 @@ const paintDiff = (diff: Uint32Array,
   canvasContext.stroke();
 };
 
-
 const Canvas: React.FC<CanvasProps> = ({height, width, cellSize, behaviors, colors, running}) => {
 
     const mod = useCrate();
-    const canvasRef = React.useRef<HTMLCanvasElement>(null);
-    const [animationId, setAnimationId] = useState<number | null>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    let animationRef = useRef<number | null>(null);
     const [universe, setUniverse] = useState<Universe | null>(null);
+    
+    const renderLoop = () => {
+      for (let i = 0; i < TICKS_PER_FRAME; i++) {
+        paintDiff(universe!.tick(), canvasRef.current!.getContext("2d")!, colors, cellSize);
+      }
+      animationRef.current = requestAnimationFrame(renderLoop);
+    }
 
-    useEffect(() => {
-      if (!running && animationId !== null) {
-        cancelAnimationFrame(animationId);
-        setAnimationId(null);
+    const startLoop = () => {
+      if (!universe || canvasRef.current === null) {
         return;
       }
-    }, [running, animationId]);
+      if (!animationRef.current) {
+        animationRef.current = requestAnimationFrame(renderLoop);
+      }
+    }
+
+    const stopLoop = () => {
+      if (animationRef.current !== null) {
+        cancelAnimationFrame(animationRef.current);
+        animationRef.current = null;
+      }
+    }
+
+    useEffect(() => {
+      if (running) {
+        startLoop();
+      } else {
+        stopLoop();
+      }
+    });
 
     useTakeEffect(() => {
       const canvas = canvasRef.current!;
@@ -74,19 +96,6 @@ const Canvas: React.FC<CanvasProps> = ({height, width, cellSize, behaviors, colo
       drawGrid(canvas, height, width, cellSize);
     }, [mod, height, width, behaviors, cellSize, canvasRef.current])
     
-    useTakeEffect(() => {
-      const canvasContext = canvasRef.current!.getContext('2d')!;
-
-      const renderLoop = () => {
-          for (let i = 0; i < TICKS_PER_FRAME; i++) {
-            paintDiff(universe!.tick(), canvasContext, colors, cellSize);
-          }
-          setAnimationId(requestAnimationFrame(renderLoop))
-      };
-
-      setAnimationId(requestAnimationFrame(renderLoop));
-    }, [universe, colors, cellSize, canvasRef.current]);
-
   return <canvas ref={canvasRef}
                  width={(cellSize + 1) * height + 1}
                  height={(cellSize + 1) * width + 1}/>
