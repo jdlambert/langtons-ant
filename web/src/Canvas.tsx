@@ -4,43 +4,41 @@ import { Universe } from './crate';
 
 type CanvasProps = {
   running: boolean,
-  height: number,
-  width: number,
+  size: number,
   cellSize: number,
   behaviors: string,
   colors: string[],
 }
 
-const TICKS_PER_FRAME = 1000;
+const TICKS_PER_FRAME = 250;
 const GRID_COLOR = "#CCCCCC";
 
-const drawGrid = (canvas: HTMLCanvasElement, height: number, width: number, cellSize: number) => {
+const drawGrid = (canvas: HTMLCanvasElement, size: number, cellSize: number) => {
     const canvasContext = canvas.getContext('2d')!;
-    canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+    canvasContext.clearRect(0, 0, canvas.height, canvas.width);
     canvasContext.beginPath();
     canvasContext.strokeStyle = GRID_COLOR;
 
-    // Vertical lines.
-    for (let i = 0; i <= width; i++) {
-      canvasContext.moveTo(i * (cellSize + 1) + 1, 0);
-      canvasContext.lineTo(i * (cellSize + 1) + 1, (cellSize + 1) * height + 1);
-    }
-    // Horizontal lines.
-    for (let j = 0; j <= height; j++) {
+    for (let j = 0; j <= size; j++) {
+      // Vertical lines.
+      canvasContext.moveTo(j * (cellSize + 1) + 1, 0);
+      canvasContext.lineTo(j * (cellSize + 1) + 1, (cellSize + 1) * size + 1);
+
+      // Horizontal lines.
       canvasContext.moveTo(0, j * (cellSize + 1) + 1);
-      canvasContext.lineTo((cellSize + 1) * width + 1, j * (cellSize + 1) + 1);
+      canvasContext.lineTo((cellSize + 1) * size + 1, j * (cellSize + 1) + 1);
     }
 
     canvasContext.stroke();
 };
 
 const paintDiff = (diff: Uint32Array,
-                    canvasContext: CanvasRenderingContext2D,
-                    colors: string[],
-                    cellSize: number) => {
+                   canvasContext: CanvasRenderingContext2D,
+                   colors: string[],
+                   cellSize: number) => {
   canvasContext.beginPath();
 
-  canvasContext.fillStyle = colors[diff[2]];
+  canvasContext.fillStyle = colors[diff[2] % colors.length];
 
   canvasContext.fillRect(
     diff[1] * (cellSize + 1) + 1,
@@ -51,7 +49,7 @@ const paintDiff = (diff: Uint32Array,
   canvasContext.stroke();
 };
 
-const Canvas: React.FC<CanvasProps> = ({height, width, cellSize, behaviors, colors, running}) => {
+const Canvas: React.FC<CanvasProps> = ({size, cellSize, behaviors, colors, running}) => {
     const mod = useCrate();
     const canvasRef = useRef<HTMLCanvasElement>(null);
     let animationRef = useRef<number | null>(null);
@@ -89,14 +87,14 @@ const Canvas: React.FC<CanvasProps> = ({height, width, cellSize, behaviors, colo
 
     useTakeEffect(() => {
       if (canvasRef.current) {
-        universeRef.current = mod.Universe.new(height, width, behaviors);
-        drawGrid(canvasRef.current!, height, width, cellSize);
+        universeRef.current = mod.Universe.new(size, size, behaviors);
+        drawGrid(canvasRef.current!, size, cellSize);
       }
-    }, [mod, height, width, behaviors, cellSize])
-    
-  return <canvas ref={canvasRef}
-                 width={(cellSize + 1) * height + 1}
-                 height={(cellSize + 1) * width + 1}/>
+    }, [mod, size, size, behaviors, cellSize])
+   
+  const fullSize = (cellSize + 1) * size + 1
+
+  return <canvas ref={canvasRef} height={fullSize} width={fullSize}/>
 }
 
 export default Canvas;
