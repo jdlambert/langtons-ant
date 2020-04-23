@@ -6,12 +6,12 @@
 
 ### `yarn start`
 
-Start dev server then watch `.rs` and `.ts` and rebuild if files are changed.
+Starts dev server then watch `.rs` and `.ts` and rebuild if files are changed.
 
 ### `yarn test`
 
-Run `wasm-pack test --firefox --headless` and `react-scripts test`.
+Runs `wasm-pack test --firefox --headless` and `react-scripts test`.
 
 ### `yarn build`
 
-Compile `.rs` to `.wasm` using `wasm-pack` then build React app using `create-react-app`.
+Compiles `.rs` to `.wasm` using `wasm-pack`, then builds React app using `create-react-app`.
